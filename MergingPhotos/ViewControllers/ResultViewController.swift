@@ -19,7 +19,7 @@ class ResultViewController: UIViewController {
         view.backgroundColor = .white
         setupUI()
         
-        resultImageView.image = firstImage.combineWith(image: secondImage)
+        resultImageView.image = firstImage.merge(image: secondImage)
     }
     
     func configure(firstImage: UIImage, secondImage: UIImage) {
