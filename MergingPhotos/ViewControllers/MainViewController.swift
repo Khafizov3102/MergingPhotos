@@ -13,9 +13,12 @@ final class MainViewController: UIViewController {
     private var secondImageView = UIImageView()
     private var mergeButton: UIButton = {
         var button = UIButton()
-        button.setTitle("Merge photos", for: .normal)
+        button.setTitle("Merge photos ", for: .normal)
         return button
     }()
+    
+    private var firstImagePickerController = UIImagePickerController()
+    private var secondImagePickerController = UIImagePickerController()
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -25,30 +28,23 @@ final class MainViewController: UIViewController {
     
     @objc
     private func makeFirstPhotoButtonPressed() {
-        makePhoto(for: firstImageView)
+        firstImagePickerController.delegate = self
+        firstImagePickerController.sourceType = .photoLibrary
+        present(firstImagePickerController, animated: true)
     }
     
     @objc
     private func makeSecondPhotoButtonPressed() {
-        makePhoto(for: secondImageView)
+        secondImagePickerController.delegate = self
+        secondImagePickerController.sourceType = .camera
+        present(secondImagePickerController, animated: true)
     }
     
     @objc
     private func mergeButtonPressed() {
         let resultVC = ResultViewController()
-        if let firstImage = firstImageView.image, let secondImage = secondImageView.image {
-            resultVC.configure(firstImage: firstImage, secondImage: secondImage)
-        }
+        resultVC.configure(firstImage: firstImageView.image ?? UIImage(), secondImage: secondImageView.image ?? UIImage())
         present(resultVC, animated: true)
-    }
-    
-    private func makePhoto(for imageView: UIImageView) {
-        let imagePickerController = UIImagePickerController()
-        imagePickerController.delegate = self
-        imagePickerController.sourceType = .camera
-        present(imagePickerController, animated: true) {
-            objc_setAssociatedObject(imagePickerController, AssociatedKeys.imageViewKey, imageView, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
-        }
     }
     
     private func setupUI() {
@@ -72,10 +68,10 @@ final class MainViewController: UIViewController {
         secondButton.setTitleColor(.black, for: .normal)
         secondButton.addTarget(self, action: #selector(makeSecondPhotoButtonPressed), for: .touchUpInside)
         
-        let firtPhotoStackView = UIStackView(arrangedSubviews: [firstImageView, firstButton])
-        firtPhotoStackView.axis = .vertical
-        firtPhotoStackView.spacing = 10
-        firtPhotoStackView.distribution = .fill
+        let firstPhotoStackView = UIStackView(arrangedSubviews: [firstImageView, firstButton])
+        firstPhotoStackView.axis = .vertical
+        firstPhotoStackView.spacing = 10
+        firstPhotoStackView.distribution = .fill
         
         let secondPhotoStackView = UIStackView(arrangedSubviews: [secondImageView, secondButton])
         secondPhotoStackView.axis = .vertical
@@ -87,7 +83,7 @@ final class MainViewController: UIViewController {
         mergeButton.setTitleColor(.darkGray, for: .normal)
         view.addSubview(mergeButton)
         
-        let mainStackView = UIStackView(arrangedSubviews: [firtPhotoStackView, secondPhotoStackView])
+        let mainStackView = UIStackView(arrangedSubviews: [firstPhotoStackView, secondPhotoStackView])
         mainStackView.axis = .horizontal
         mainStackView.spacing = 30
         mainStackView.distribution = .fillEqually
@@ -108,14 +104,15 @@ final class MainViewController: UIViewController {
 }
 
 extension MainViewController: UIImagePickerControllerDelegate, UINavigationControllerDelegate {
-    private struct AssociatedKeys {
-        static var imageViewKey = "imageView"
-    }
-    
-    func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {        if let imageView = objc_getAssociatedObject(picker, AssociatedKeys.imageViewKey) as? UIImageView {
-            if let image = info[.originalImage] as? UIImage {
-                imageView.image = image
-            }
+    func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
+        guard let image = info[.originalImage] as? UIImage else {
+            dismiss(animated: true)
+            return
+        }
+        if picker == firstImagePickerController {
+            firstImageView.image = image
+        } else if picker == secondImagePickerController {
+            secondImageView.image = image
         }
         dismiss(animated: true)
     }
