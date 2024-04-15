@@ -13,7 +13,7 @@ final class MainViewController: UIViewController {
     private var secondImageView = UIImageView()
     private var mergeButton: UIButton = {
         var button = UIButton()
-        button.setTitle("Merge photos ", for: .normal)
+        button.setTitle("Merge photos", for: .normal)
         return button
     }()
     
@@ -29,7 +29,7 @@ final class MainViewController: UIViewController {
     @objc
     private func makeFirstPhotoButtonPressed() {
         firstImagePickerController.delegate = self
-        firstImagePickerController.sourceType = .photoLibrary
+        firstImagePickerController.sourceType = .camera
         present(firstImagePickerController, animated: true)
     }
     
